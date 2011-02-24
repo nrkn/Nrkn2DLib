@@ -10,13 +10,11 @@ namespace Nrkn2DLib.Extensions {
       var yRatio = grid.Height / (double) size.Height;
       var newGrid = new Grid<T>( size.Width, size.Height );
 
-      for( var y = 0; y < size.Height; y++ ) {
-        for( var x = 0; x < size.Width; x++ ) {
-          var pointX = Math.Floor( x * xRatio );
-          var pointY = Math.Floor( y * yRatio );
-          newGrid[ x, y ] = grid.Cells.ToList()[ (int) ( ( pointY * grid.Width ) + pointX ) ];
-        }
-      }
+      newGrid.SetEach( ( c, x, y ) => {
+        var pointX = Math.Floor( x * xRatio );
+        var pointY = Math.Floor( y * yRatio );
+        return grid.Cells.ToList()[ (int) ( ( pointY * grid.Width ) + pointX ) ];          
+      } );
 
       return newGrid; 
     }
@@ -26,33 +24,32 @@ namespace Nrkn2DLib.Extensions {
       var yRatio = grid.Height / (double) size.Height;
       var newGrid = new Grid<double>( size.Width, size.Height );
 
-      for( var y = 0; y < size.Height; y++ ) {
-        for( var x = 0; x < size.Width; x++ ) {
-          var pointX = (int) Math.Floor( x * xRatio );
-          var pointY = (int) Math.Floor( y * yRatio );
+      newGrid.SetEach( ( c, x, y ) => {
+        var pointX = (int) Math.Floor( x * xRatio );
+        var pointY = (int) Math.Floor( y * yRatio );
 
-          var ceilingX = pointX + 1;
-          if( ceilingX >= grid.Width ) ceilingX = wrap ? 0 : pointX;
-          var ceilingY = pointY + 1;
-          if( ceilingY >= grid.Height ) ceilingY = wrap ? 0 : pointY;
+        var ceilingX = pointX + 1;
+        if( ceilingX >= grid.Width ) ceilingX = wrap ? 0 : pointX;
+        var ceilingY = pointY + 1;
+        if( ceilingY >= grid.Height ) ceilingY = wrap ? 0 : pointY;
 
-          var fractionX = x * xRatio - pointX;
-          var fractionY = y * yRatio - pointY;
+        var fractionX = x * xRatio - pointX;
+        var fractionY = y * yRatio - pointY;
 
-          var oneLessX = 1.0 - fractionX;
-          var oneLessY = 1.0 - fractionY;
+        var oneLessX = 1.0 - fractionX;
+        var oneLessY = 1.0 - fractionY;
 
-          var c1 = grid[ pointX, pointY ];
-          var c2 = grid[ ceilingX, pointY ];
-          var c3 = grid[ pointX, ceilingY ];
-          var c4 = grid[ ceilingX, ceilingY ];
+        var c1 = grid[ pointX, pointY ];
+        var c2 = grid[ ceilingX, pointY ];
+        var c3 = grid[ pointX, ceilingY ];
+        var c4 = grid[ ceilingX, ceilingY ];
 
-          var b1 = oneLessX * c1 + fractionX * c2;
-          var b2 = oneLessX * c3 + fractionX * c4;
+        var b1 = oneLessX * c1 + fractionX * c2;
+        var b2 = oneLessX * c3 + fractionX * c4;
 
-          newGrid[ x, y ] = oneLessY * b1 + fractionY * b2;
-        }
-      }
+        return oneLessY * b1 + fractionY * b2;      
+      } );
+
 
       return newGrid;
     }
@@ -90,13 +87,12 @@ namespace Nrkn2DLib.Extensions {
       builder.AppendLine( "P2" );
       builder.AppendLine( String.Format( "{0} {1}", grid.Width, grid.Height ) );
       builder.AppendLine( "255" );
-      for( var y = 0; y < grid.Height; y++ ) {
-        for( var x = 0; x < grid.Width; x++ ) {
-          builder.Append( Math.Floor( grid[ x, y ] * 255 ) );
-          builder.Append( " " );
-        }
-        builder.AppendLine();
-      }
+      
+      grid.ForEach( ( c, x, y ) => {
+        builder.Append( Math.Floor( grid[ x, y ] * 255 ) );
+        if( x == grid.Width - 1 ) builder.AppendLine(); 
+        else builder.Append( " " );
+      } );
 
       return builder.ToString();
     }

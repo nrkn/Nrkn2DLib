@@ -4,7 +4,23 @@ using System.Linq;
 using System.Text;
 
 namespace Nrkn2DLib {
+  /// <summary>
+  /// A 2D grid of T
+  /// </summary>
+  /// <typeparam name="T">Anything</typeparam>
   public class Grid<T> {
+    /// <summary>
+    /// Grid constructor
+    /// </summary>
+    /// <param name="size">The size of the grid</param>
+    public Grid( Size size ) : this( size.Width, size.Height ) {
+      
+    }
+    /// <summary>
+    /// Grid constructor
+    /// </summary>
+    /// <param name="width">The width of the grid</param>
+    /// <param name="height">The height of the grid</param>
     public Grid( int width = 0, int height = 0 ) {
       _grid = new List<List<T>>();
       _width = width;
@@ -15,14 +31,23 @@ namespace Nrkn2DLib {
       Initialize(); 
     }
 
+    /// <summary>
+    /// The grid width
+    /// </summary>
     public int Width {
       get { return _width; }
     }
 
+    /// <summary>
+    /// The grid height
+    /// </summary>
     public int Height {
       get { return _height; }
     }
 
+    /// <summary>
+    /// Bounding box for the grid
+    /// </summary>
     public Rectangle Bounds {
       get {
         return new Rectangle {
@@ -70,22 +95,34 @@ namespace Nrkn2DLib {
       return builder.ToString();
     }
 
-    public void SetEach( Func<T,T> action ) {
+    /// <summary>
+    /// Set each cell in the grid
+    /// </summary>
+    /// <param name="func">T Func( T currentValue )</param>
+    public void SetEach( Func<T,T> func ) {
       for( var y = 0; y < Height; y++ ) {
         for( var x = 0; x < Width; x++ ) {
-          _grid[ y ][ x ] = action( _grid[ y ][ x ] );
+          _grid[ y ][ x ] = func( _grid[ y ][ x ] );
         }
       }     
     }
 
-    public void SetEach( Func<T, int, int, T> action ) {
+    /// <summary>
+    /// Set each cell of the grid
+    /// </summary>
+    /// <param name="func">T Func( T currentValue, int x, int y )</param>
+    public void SetEach( Func<T, int, int, T> func ) {
       for( var y = 0; y < Height; y++ ) {
         for( var x = 0; x < Width; x++ ) {
-          _grid[ y ][ x ] = action( _grid[ y ][ x ], x, y );
+          _grid[ y ][ x ] = func( _grid[ y ][ x ], x, y );
         }
       }
     }
 
+    /// <summary>
+    /// Perform an action with each cell of the grid
+    /// </summary>
+    /// <param name="action">void Action( T currentValue )</param>
     public void ForEach( Action<T> action ) {
       for( var y = 0; y < Height; y++ ) {
         for( var x = 0; x < Width; x++ ) {
@@ -94,6 +131,10 @@ namespace Nrkn2DLib {
       }
     }
 
+    /// <summary>
+    /// Perform an action with each cell of the grid
+    /// </summary>
+    /// <param name="action">void Action( T currentValue, int x, int y )</param>
     public void ForEach( Action<T, int, int> action ) {
       for( var y = 0; y < Height; y++ ) {
         for( var x = 0; x < Width; x++ ) {
@@ -102,6 +143,9 @@ namespace Nrkn2DLib {
       }
     }
 
+    /// <summary>
+    /// The grid cells. If you pass too many cells it will ignore the extra ones. If you pass too few it will fill the grid out with default( T )
+    /// </summary>
     public IEnumerable<T> Cells {
       get {
         var cells = new List<T>();
@@ -114,11 +158,22 @@ namespace Nrkn2DLib {
       }
     }
 
+    /// <summary>
+    /// Gets or sets a cell
+    /// </summary>
+    /// <param name="point">The location of the cell</param>
+    /// <returns>The cell at point</returns>
     public T this[ Point point ] {
       get { return this[ point.X, point.Y ]; }
       set { this[ point.X, point.Y ] = value; }
     }
 
+    /// <summary>
+    /// Gets or sets a cell
+    /// </summary>
+    /// <param name="x">The x location of the cell</param>
+    /// <param name="y">The y location of the cell</param>
+    /// <returns>The cell at [ x, y ]</returns>
     public T this[ int x, int y ] {
       get{
         return _grid[ y ][ x ];
