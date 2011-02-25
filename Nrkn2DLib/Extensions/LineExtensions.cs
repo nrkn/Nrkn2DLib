@@ -1,15 +1,24 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using Nrkn2DLib.Interfaces;
 
 namespace Nrkn2DLib.Extensions {
   public static class LineExtensions {
-    public static IEnumerable<Point> Bresenham( this Line line ) {
+    public static ILine Normalize( this ILine line ){
+      return new Line(
+        new Point( line.Verticals.Min(), line.Horizontals.Min() ),
+        new Point( line.Verticals.Max(), line.Horizontals.Max() )
+      );
+    }
+
+    public static IEnumerable<IPoint> Bresenham( this ILine line ) {
       var deltaX = line.End.X.Delta( line.Start.X );
       var deltaY = line.End.Y.Delta( line.Start.Y );
       var stepX = line.Start.X.Step( line.End.X );
       var stepY = line.Start.Y.Step( line.End.Y );
       var error = deltaX - deltaY;
       var current = line.Start;
-      var points = new List<Point>();
+      var points = new List<IPoint>();
 
       while( true ) {
         points.Add( current );
@@ -30,9 +39,9 @@ namespace Nrkn2DLib.Extensions {
       return points;
     }
 
-    public static IEnumerable<Point> DrunkenWalk( this Line line, double drunkenness, Rectangle bounds = new Rectangle() ) {
-      var current = line.Start;
-      var points = new List<Point> { current };
+    public static IEnumerable<IPoint> DrunkenWalk( this ILine line, double drunkenness, IRectangle bounds = null ) {
+      var current = new Point( line.Start.X, line.Start.Y );
+      var points = new List<IPoint> { current };
       while( !current.Equals( line.End ) ) {
         var oldLocation = new Point( current.X, current.Y );
 
@@ -58,7 +67,7 @@ namespace Nrkn2DLib.Extensions {
           }
         }
 
-        if( !bounds.IsEmpty ) {
+        if( bounds != null ) {
           if( current.X < bounds.Left || current.X > bounds.Right || current.Y < bounds.Top || current.Y > bounds.Bottom ) {
             current = oldLocation;
             continue;
@@ -67,6 +76,7 @@ namespace Nrkn2DLib.Extensions {
 
         points.Add( current );
       }
+
       return points;
     }
   }

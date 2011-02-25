@@ -13,5 +13,9 @@ namespace Nrkn2DLib.Extensions {
     public static double Clamp( this double x, double min, double max ) {
       return x < min ? min : x > max ? max : x;
     }
+
+    public static double Clamp( this int x, int min, int max ) {
+      return x < min ? min : x > max ? max : x;
+    }
   }
 }

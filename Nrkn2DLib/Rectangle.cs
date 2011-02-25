@@ -1,71 +1,68 @@
-﻿namespace Nrkn2DLib {
-  public struct Rectangle {
-    public Rectangle( Line line ) {
-      _topLeft = line.Normalized.Start;
-      _bottomRight = line.Normalized.End;
+﻿using System.Collections.Generic;
+using Nrkn2DLib.Interfaces;
+
+namespace Nrkn2DLib {
+  public struct Rectangle : IRectangle {
+    public Rectangle( int top, int right, int bottom, int left ) : this() {
+      Top = top;
+      Left = left;
+      Right = right;
+      Bottom = bottom;
+    }
+    public Rectangle( ISize size ) : this( 0, size.Width - 1, size.Height - 1, 0 ) { }
+    public Rectangle( int width, int height ) : this( new Size( width, height ) ) { }
+
+    public int Top { get; set; }
+
+    public int Bottom { get; set; }
+
+    public int Left { get; set; }
+
+    public int Right { get; set; }
+
+    public int Width { get { return ( Right - Left ) + 1; } }
+
+    public int Height { get { return ( Bottom - Top ) + 1; } }
+
+    public ISize Size {
+      get { return new Size( Width, Height ); }
     }
 
-    private Point _topLeft;
-    private Point _bottomRight;
+    public IEnumerable<IPoint> Points {
+      get { return new[] {TopLeft, TopRight, BottomRight, BottomLeft}; }
+    }
 
-    public int Top { 
+    public IEnumerable<ILine> Lines {
       get {
-        return _topLeft.Y;
+        return new ILine[] {
+          new Line( TopLeft, TopRight ),
+          new Line( TopRight, BottomRight ),
+          new Line( BottomRight, BottomLeft ),
+          new Line( BottomLeft, TopLeft )
+        };
       }
-      set {
-        _topLeft.Y = value;
-      }
-    }
-
-    public int Bottom {
-      get {
-        return _bottomRight.Y;
-      }
-      set {
-        _bottomRight.Y = value;
-      }
-    }
-
-    public int Left {
-      get {
-        return _topLeft.X;
-      }
-      set {
-        _topLeft.X = value;
-      }
-    }
-
-    public int Right {
-      get {
-        return _bottomRight.X;
-      }
-      set {
-        _bottomRight.X = value;
-      }
-    }
-
-    public int Width {
-      get { return Right - Left; }
-    }
-
-    public int Height {
-      get { return Bottom - Top; }
     }
 
     public bool IsEmpty {
       get {
-        return _topLeft.Equals( new Point() ) && _topLeft.Equals( _bottomRight );
+        return TopLeft.Equals( new Point() ) && TopLeft.Equals( BottomRight );
       }
     }
-  }
 
-  public struct Size {
-    public Size( int width, int height ) {
-      Width = width;
-      Height = height;
+    public IPoint TopLeft {
+      get { return new Point( Left, Top ); }
     }
 
-    public int Width;
-    public int Height;
+    public IPoint TopRight {
+      get { return new Point( Right, Top );}
+    }
+
+    public IPoint BottomRight {
+      get { return new Point( Right, Bottom ); }
+    }
+
+    public IPoint BottomLeft {
+      get {return new Point( Bottom, Left );}
+    }
   }
 }

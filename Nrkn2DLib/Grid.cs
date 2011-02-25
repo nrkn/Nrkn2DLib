@@ -2,19 +2,21 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Nrkn2DLib.Interfaces;
 
 namespace Nrkn2DLib {
   /// <summary>
   /// A 2D grid of T
   /// </summary>
   /// <typeparam name="T">Anything</typeparam>
-  public class Grid<T> {
+  public class Grid<T> : IGrid<T> {
     /// <summary>
     /// Grid constructor
     /// </summary>
     /// <param name="size">The size of the grid</param>
-    public Grid( Size size ) : this( size.Width, size.Height ) {
-      
+    public Grid( Size size )
+      : this( size.Width, size.Height ) {
+
     }
     /// <summary>
     /// Grid constructor
@@ -28,7 +30,7 @@ namespace Nrkn2DLib {
 
       if( Width == 0 || Height == 0 ) return;
 
-      Initialize(); 
+      Initialize();
     }
 
     /// <summary>
@@ -45,17 +47,21 @@ namespace Nrkn2DLib {
       get { return _height; }
     }
 
+    public ISize Size {
+      get { return new Size( _width, _height ); }
+    }
+
     /// <summary>
     /// Bounding box for the grid
     /// </summary>
-    public Rectangle Bounds {
+    public IRectangle Bounds {
       get {
         return new Rectangle {
           Top = 0,
           Left = 0,
           Right = Width - 1,
           Bottom = Height - 1
-        }; 
+        };
       }
     }
 
@@ -84,7 +90,7 @@ namespace Nrkn2DLib {
       return builder.ToString();
     }
 
-    public string ToString( Func<T,string> converter ) {
+    public string ToString( Func<T, string> converter ) {
       var builder = new StringBuilder();
       foreach( var row in _grid ) {
         foreach( var cell in row ) {
@@ -95,16 +101,41 @@ namespace Nrkn2DLib {
       return builder.ToString();
     }
 
+    T IGrid<T>.this[ IPoint point ] {
+      get { return this[ point.X, point.Y ]; }
+      set { this[ point.X, point.Y ] = value; }
+    }
+
+    public void ForEach( Action<IPoint> action ) {
+      for( var y = 0; y < Height; y++ ) {
+        for( var x = 0; x < Width; x++ ) {
+          action( new Point( x, y ) );
+        }
+      }
+    }
+
+    /// <summary>
+    /// Set each cell in the grid
+    /// </summary>
+    /// <param name="func">T Func()</param>
+    public void SetEach( Func<T> func ) {
+      for( var y = 0; y < Height; y++ ) {
+        for( var x = 0; x < Width; x++ ) {
+          _grid[ y ][ x ] = func();
+        }
+      }
+    }
+
     /// <summary>
     /// Set each cell in the grid
     /// </summary>
     /// <param name="func">T Func( T currentValue )</param>
-    public void SetEach( Func<T,T> func ) {
+    public void SetEach( Func<T, T> func ) {
       for( var y = 0; y < Height; y++ ) {
         for( var x = 0; x < Width; x++ ) {
           _grid[ y ][ x ] = func( _grid[ y ][ x ] );
         }
-      }     
+      }
     }
 
     /// <summary>
@@ -143,6 +174,22 @@ namespace Nrkn2DLib {
       }
     }
 
+    public void ForEach( Action<int, int> action ) {
+      for( var y = 0; y < Height; y++ ) {
+        for( var x = 0; x < Width; x++ ) {
+          action( x, y );
+        }
+      }
+    }
+
+    public void ForEach( Action<T, IPoint> action ) {
+      for( var y = 0; y < Height; y++ ) {
+        for( var x = 0; x < Width; x++ ) {
+          action( _grid[ y ][ x ], new Point( x, y ) );
+        }
+      }
+    }
+
     /// <summary>
     /// The grid cells. If you pass too many cells it will ignore the extra ones. If you pass too few it will fill the grid out with default( T )
     /// </summary>
@@ -161,21 +208,11 @@ namespace Nrkn2DLib {
     /// <summary>
     /// Gets or sets a cell
     /// </summary>
-    /// <param name="point">The location of the cell</param>
-    /// <returns>The cell at point</returns>
-    public T this[ Point point ] {
-      get { return this[ point.X, point.Y ]; }
-      set { this[ point.X, point.Y ] = value; }
-    }
-
-    /// <summary>
-    /// Gets or sets a cell
-    /// </summary>
     /// <param name="x">The x location of the cell</param>
     /// <param name="y">The y location of the cell</param>
     /// <returns>The cell at [ x, y ]</returns>
     public T this[ int x, int y ] {
-      get{
+      get {
         return _grid[ y ][ x ];
       }
       set {
