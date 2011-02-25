@@ -101,7 +101,7 @@ namespace Nrkn2DLib {
       return builder.ToString();
     }
 
-    T IGrid<T>.this[ IPoint point ] {
+    public T this[ IPoint point ] {
       get { return this[ point.X, point.Y ]; }
       set { this[ point.X, point.Y ] = value; }
     }
