@@ -11,11 +11,11 @@ namespace ConsoleDemo {
     static void Main( string[] args ) {
       //generate a forest using some noise and put two rough paths through it, one running from top left to bottom right and one from bottom left to top right
       var command = String.Empty;
-      var noisyGrid = new Grid<double>( 78, 23 );
+      IGrid<double> noisyGrid = new Grid<double>( 78, 23 );
       do {
         if( command == "W" ) File.WriteAllText( "screen.pgm", noisyGrid.ToPgm() );
         Console.Clear();
-        noisyGrid = (Grid<double>) new Grid<double>( 78, 23 ).NoiseFill( 5 );
+        noisyGrid = new Grid<double>( 78, 23 ).NoiseFill( 5 );
 
         noisyGrid.Cells = noisyGrid.Cells.Normalize();
 
@@ -36,27 +36,27 @@ namespace ConsoleDemo {
 
         var walls = new Grid<double>( 78, 23 );
         var building = new Rectangle( new Size( 5, 6 ) );
-        //place one in top left
-        var buildingPoints = new List<IPoint>();
+
+        var wallPoints = new List<IPoint>();
         foreach( var line in building.Lines ) {
-          buildingPoints.AddRange( line.Bresenham() );
+          wallPoints.AddRange( line.Bresenham() );
         }
 
         foreach( var line in building.Lines.Translate( new Point( 10, 7 )) ) {
-          buildingPoints.AddRange( line.Bresenham() );  
+          wallPoints.AddRange( line.Bresenham() );  
         }
 
         var rotated1 = new Point( 50, 7 );
         foreach( var line in building.Lines.Translate( rotated1 ).Rotate( 45, rotated1 ) ) {
-          buildingPoints.AddRange( line.Bresenham() );
+          wallPoints.AddRange( line.Bresenham() );
         }
        
         var rotated3 = new Point( 35, 7 );
         foreach( var line in building.Lines.Translate( rotated3 ).Rotate( 90, rotated3 ) ) {
-          buildingPoints.AddRange( line.Bresenham() );
+          wallPoints.AddRange( line.Bresenham() );
         }
 
-        foreach( var point in buildingPoints ) {
+        foreach( var point in wallPoints ) {
           walls[ point ] = 1;
         }
 
