@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Nrkn2DLib;
 using Nrkn2DLib.Extensions;
+using Nrkn2DLib.Interfaces;
 
 namespace ConsoleDemo {
   class Program {
@@ -32,47 +34,62 @@ namespace ConsoleDemo {
           river[ point ] = 1;
         }
 
+        var walls = new Grid<double>( 78, 23 );
+        var building = new Rectangle( new Size( 5, 6 ) );
+        //place one in top left
+        var buildingPoints = new List<IPoint>();
+        foreach( var line in building.Lines ) {
+          buildingPoints.AddRange( line.Bresenham() );
+        }
+
+        foreach( var line in building.Lines.Translate( new Point( 10, 7 )) ) {
+          buildingPoints.AddRange( line.Bresenham() );  
+        }
+
+        var rotated1 = new Point( 50, 7 );
+        foreach( var line in building.Lines.Translate( rotated1 ).Rotate( 45, rotated1 ) ) {
+          buildingPoints.AddRange( line.Bresenham() );
+        }
+       
+        var rotated3 = new Point( 35, 7 );
+        foreach( var line in building.Lines.Translate( rotated3 ).Rotate( 90, rotated3 ) ) {
+          buildingPoints.AddRange( line.Bresenham() );
+        }
+
+        foreach( var point in buildingPoints ) {
+          walls[ point ] = 1;
+        }
+
         noisyGrid.ForEach( ( value, point ) => {
-          Console.BackgroundColor =  
-            path[ point ] == 1 && river[ point] == 1?
-              ConsoleColor.DarkYellow 
-            :
-              path[ point ] == 1 ?
-                ConsoleColor.Green
-              :
-                river[ point ] == 1 ?
-                  ConsoleColor.DarkBlue
-                :
-                  ConsoleColor.DarkGreen;
+          Console.BackgroundColor =
+            walls[ point ] == 1 ? ConsoleColor.Gray
+            : path[ point ] == 1 && river[ point] == 1 ? ConsoleColor.DarkYellow 
+            : path[ point ] == 1 ? ConsoleColor.Green
+            : river[ point ] == 1 ? ConsoleColor.DarkBlue
+            : ConsoleColor.DarkGreen;
 
           var color = RandomHelper.Random.NextDouble();
 
           Console.ForegroundColor =
-            path[ point ] == 1 && river[ point] == 1 ?
-              ConsoleColor.DarkRed
-              :
-            path[ point ] == 1 ?
-              ConsoleColor.DarkGreen
-            : 
-              river[ point ] == 1 ?
-                ConsoleColor.Blue
-              :
-              color < 0.75 ? 
-                ConsoleColor.Green 
-              : 
-                color < 0.96 ? 
-                  ConsoleColor.Yellow 
-                : 
-                  color < 0.97 ? 
-                    ConsoleColor.DarkRed 
-                  : 
-                    color < 0.98 ? 
-                      ConsoleColor.DarkMagenta 
-                    : 
-                      ConsoleColor.DarkCyan;
+            walls[ point ] == 1 ? ConsoleColor.DarkGray
+            : path[ point ] == 1 && river[ point] == 1 ? ConsoleColor.DarkRed
+            : path[ point ] == 1 ? ConsoleColor.DarkGreen
+            : river[ point ] == 1 ? ConsoleColor.Blue
+            : color < 0.75 ? ConsoleColor.Green 
+            : color < 0.96 ? ConsoleColor.Yellow 
+            : color < 0.97 ? ConsoleColor.DarkRed 
+            : color < 0.98 ? ConsoleColor.DarkMagenta 
+            : ConsoleColor.DarkCyan;
 
 
-          Console.Write( path[ point ] == 1 && river[ point] == 1 ? "=" : path[ point ] == 1 ? "." : river[ point ] == 1 ? "~" : DoubleToForestItem( value ) );
+          Console.Write( 
+            walls[ point ] == 1 && path[ point ] == 1 ? "+"
+            : walls[ point ] == 1 ? "#" 
+            : path[ point ] == 1 && river[ point] == 1 ? "=" 
+            : path[ point ] == 1 ? "." 
+            : river[ point ] == 1 ? "~" 
+            : DoubleToForestItem( value ) 
+          );
 
           Console.BackgroundColor = ConsoleColor.Black;
           if( point.X == noisyGrid.Width - 1 ) Console.WriteLine();          
@@ -88,18 +105,11 @@ namespace ConsoleDemo {
     static string DoubleToForestItem( double value ) {
       return 
         RandomHelper.Random.NextDouble() > value ?
-          value < 0.5 ? 
-            "♠" 
-          : 
-            value < 0.6 ? 
-              "♣" 
-            : 
-              value < 0.7 ? 
-                "T" 
-              : 
-                "t" 
-        : 
-          ".";
+          value < 0.5 ? "♠" 
+          : value < 0.6 ? "♣" 
+          : value < 0.7 ? "T" 
+          : "t" 
+        : ".";
     }
   }
 }

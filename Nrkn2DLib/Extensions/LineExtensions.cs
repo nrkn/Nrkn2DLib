@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Nrkn2DLib.Interfaces;
 
@@ -21,7 +22,7 @@ namespace Nrkn2DLib.Extensions {
       var points = new List<IPoint>();
 
       while( true ) {
-        points.Add( current );
+        points.Add( new Point( current.X, current.Y ) );
         if( current.Equals( line.End ) ) break;
 
         var error2 = 2 * error;
@@ -78,6 +79,18 @@ namespace Nrkn2DLib.Extensions {
       }
 
       return points;
+    }
+
+    public static IEnumerable<ILine> Rotate( this IEnumerable<ILine> lines, double degrees ) {
+      return lines.Select( line => new Line( line.Start.Rotate( degrees ), line.End.Rotate( degrees ) ) ).Cast<ILine>();
+    }
+
+    public static IEnumerable<ILine> Rotate( this IEnumerable<ILine> lines, double degrees, IPoint pivot ) {
+      return lines.Select( line => new Line( line.Start.Rotate( degrees, pivot ), line.End.Rotate( degrees, pivot ) ) ).Cast<ILine>();
+    }
+
+    public static IEnumerable<ILine> Translate( this IEnumerable<ILine> lines, IPoint amount ) {
+      return lines.Select( line => new Line( line.Start.Translate( amount ), line.End.Translate( amount ) ) ).Cast<ILine>();
     }
   }
 }

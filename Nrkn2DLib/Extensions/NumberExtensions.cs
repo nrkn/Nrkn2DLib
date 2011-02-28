@@ -7,7 +7,7 @@ namespace Nrkn2DLib.Extensions {
     }
 
     public static int Step( this int start, int end ) {
-      return start < end ? 1 : -1;
+      return start < end ? 1 : end < start ? -1 : 0;
     }
 
     public static double Clamp( this double x, double min, double max ) {
@@ -16,6 +16,10 @@ namespace Nrkn2DLib.Extensions {
 
     public static double Clamp( this int x, int min, int max ) {
       return x < min ? min : x > max ? max : x;
+    }
+
+    public static double ToRadians( this double degrees ) {
+      return degrees / 180 * Math.PI;
     }
   }
 }

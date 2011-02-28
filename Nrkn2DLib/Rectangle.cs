@@ -62,7 +62,7 @@ namespace Nrkn2DLib {
     }
 
     public IPoint BottomLeft {
-      get {return new Point( Bottom, Left );}
+      get {return new Point( Left, Bottom );}
     }
   }
 }
